@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ネストすごろく</title>
+
+<style>
+    .txt{
+        width: auto;
+        padding: 0.5em;
+        border: 2px solid #999;
+        box-sizing: border-box;
+        margin: 0.5em 0;
+        overflow-wrap: anywhere;
+    }
+
+    .game-box{
+        background-color:#b0c4de;
+        border: 3px solid #000000;
+        width: 100%;
+        padding: 10px 10px 12px;
+        box-sizing: border-box;
+    }
+</style>
+</head>
+
+<body>
+    <h2>ネストすごろく</h2>
+<form oninput="out.value = Number(num.value)" >
+
+<p>
+    1以上の自然数を入れてね！ 
+</p>
+
+<p>
+    ゴールまでのマス目：<input name="num" id = "num" type="number" value = "6" size="5"/>
+</p>
+
+<p>
+    <button type="button" onclick="start()"> 
+        このネストすごろくで遊ぶ！ 
+    </button>
+</p>
+<!-- ネストすごろく画面 -->
+
+<div class="game-box">
+
+    <div id="max" style="display: inline-block;">6</div>マスネストすごろく
+<p>
+    <button type="button" onclick="dice_roll()"> 
+        サイコロを振る！ 
+    </button>
+    <button type="button" onclick="dice_roll_10()"> 
+        10回振る！ 
+    </button>
+    <button type="button" onclick="dice_roll_100()"> 
+        100回振る！ 
+    </button>
+    <button type="button" onclick="dice_roll_1000()"> 
+        1000回振る！ 
+    </button>
+</p>
+<table>
+    <tr>
+        <td>ターン数：</td><td><div id="area3" >0</div></td>
+    </tr>
+</table>
+<p>
+    <table>
+        <tr>
+            <td>今の階層：</td><td><div id="area0" >1</div></td>
+        </tr>
+    </table>
+</p>
+<p>
+    <table>
+        <tr>
+            <td>今のマス目：</td><td><div id="area1" >0</div></td>
+        </tr>
+    </table> 
+</p>
+<p>
+<table>
+    <tr>
+        <td>出たサイコロの目：</td><td><div id="area2" ></div></td>
+    </tr>
+</table>
+</p>
+
+<div style="word-break: keep-all;">すごろく</div>
+<div id="main" style="overflow-wrap: anywhere; word-wrap: break-all;">[0]</div>
+
+</div>
+
+</form>
+<br>
+<br>
+<p>リンク</p>
+<p>
+    <a href="https://twitter.com/koteitan/status/1604851675604209664?s=20">ネストすごろく</a> by @koteitan
+</p>
+<p>
+    <a href="https://googology.fandom.com/ja/wiki/%E3%83%A6%E3%83%BC%E3%82%B6%E3%83%BC%E3%83%96%E3%83%AD%E3%82%B0:Nayuta_Ito/%E5%8F%8C%E5%85%AD%E3%82%92%E6%94%B9%E9%80%A0%E3%81%97%E3%81%9F%E5%B7%A8%E5%A4%A7%E6%95%B0">双六を改造した巨大数</a>
+     by Nayuta Ito
+</p>
+<br>
+
+    ログ
+    <div id="area4" class = "txt" >
+        ターン0, 階層1, 出目0, [0]
+    </div>
+
+<script>
+    function start() {//初期化
+        var num = document.getElementById("num").value;
+        var max = document.getElementById("max");
+        var main = document.getElementById("main");
+        var area0 = document.getElementById("area0");
+        var area1 = document.getElementById("area1");
+        var area2 = document.getElementById("area2");
+        var area3 = document.getElementById("area3");
+        var area4 = document.getElementById("area4");
+
+        if (num < 1) {
+            num = 1;
+        };
+        max.innerText = num;//初期値を入れる
+        main.innerText = "[0]";
+        area0.innerText = 1;
+        area1.innerText = 0;
+        area2.innerText = "";
+        area3.innerText = 0;
+        area4.innerHTML = "ターン0, 階層1, 出目0, [0]";
+    };
+
+    function dice_roll() {
+        var max = document.getElementById("max");//位置を取得
+        var main = document.getElementById("main");
+        var area0 = document.getElementById("area0");
+        var area1 = document.getElementById("area1");
+        var area2 = document.getElementById("area2");
+        var area3 = document.getElementById("area3");
+        var area4 = document.getElementById("area4");
+
+        var b_num = Number(max.textContent);//値を取得
+        var backgammon = main.textContent;
+        var floor_num = Number(area0.textContent);
+        var square_num = Number(area1.textContent);
+        var t = Number(area3.textContent);
+
+        var dice = Math.floor(Math.random() * b_num) + 1;
+
+        square_num = square_num + dice;
+
+        if (backgammon == "ゴール！") {
+            square_num = b_num;
+        } else if (b_num <= square_num && floor_num == 1) {
+            backgammon = "ゴール！";
+            square_num = b_num;
+            t = t+1;
+            var log = "<br>" + "ターン" + t +", 階層" + floor_num + ", 出目"+ dice + ", "+ backgammon;
+            area4.insertAdjacentHTML("beforeend",log);
+        } else if (b_num <= square_num) {
+            backgammon = backgammon.replace(/,\d+]$/,"]");//末尾を消す
+            floor_num = floor_num - 1;//階を減らす
+            var x = backgammon.match(/\d+]$/)[0];//マス目の値を今の階のマス目に更新
+            x = x.slice(0,x.length -1);
+            square_num = Number(x);
+            t = t+1;
+            var log = "<br>" + "ターン" + t +", 階層" + floor_num + ", 出目"+ dice + ", "+ backgammon;
+            area4.insertAdjacentHTML("beforeend",log);
+        } else{
+            backgammon = backgammon.replace(/\d+]$/, square_num + ",0]");
+            floor_num = floor_num + 1;
+            square_num = 0;
+            t = t+1;
+            var log = "<br>" + "ターン" + t +", 階層" + floor_num + ", 出目"+ dice + ", "+ backgammon;
+            area4.insertAdjacentHTML("beforeend",log);
+        };
+
+        max.innerText = b_num;
+        main.innerText = backgammon;
+        area0.innerText = floor_num;
+        area1.innerText = square_num;
+        area2.innerText = dice;
+        area3.innerText = t;
+    };
+
+    function dice_roll_10() {
+        for (let i = 0; i < 10; i++) {
+            dice_roll()
+        }
+    };
+
+    function dice_roll_100() {
+        for (let i = 0; i < 100; i++) {
+            dice_roll()
+        }
+    };
+
+    function dice_roll_1000() {
+        var max = document.getElementById("max");//位置を取得
+        var main = document.getElementById("main");
+        var area0 = document.getElementById("area0");
+        var area1 = document.getElementById("area1");
+        var area2 = document.getElementById("area2");
+        var area3 = document.getElementById("area3");
+        var area4 = document.getElementById("area4");
+
+        var b_num = Number(max.textContent);//値を取得
+        var backgammon = main.textContent;
+        var floor_num = Number(area0.textContent);
+        var square_num = Number(area1.textContent);
+        var dice = 1;
+        var t = Number(area3.textContent);
+        var x = "";
+        var log = "";
+
+        for (let i = 0; i < 1000; i++) {
+        dice = Math.floor(Math.random() * b_num) + 1;
+
+        square_num = square_num + dice;
+
+        if (backgammon == "ゴール！") {
+            square_num = b_num;
+        } else if (b_num <= square_num && floor_num == 1) {
+            backgammon = "ゴール！";
+            square_num = b_num;
+            t = t+1;
+            log = log + "<br>" + "ターン" + t +", 階層" + floor_num + ", 出目"+ dice + ", "+ backgammon;
+        } else if (b_num <= square_num) {
+            backgammon = backgammon.replace(/,\d+]$/,"]");//末尾を消す
+            floor_num = floor_num - 1;//階を減らす
+            x = backgammon.match(/\d+]$/)[0];//マス目の値を今の階のマス目に更新
+            x = x.slice(0,x.length -1);
+            square_num = Number(x);
+            t = t+1;
+            log = log + "<br>" + "ターン" + t +", 階層" + floor_num + ", 出目"+ dice + ", "+ backgammon;
+        } else{
+            backgammon = backgammon.replace(/\d+]$/, square_num + ",0]");
+            floor_num = floor_num + 1;
+            square_num = 0;
+            t = t+1;
+            log = log + "<br>" + "ターン" + t +", 階層" + floor_num + ", 出目"+ dice + ", "+ backgammon;
+        };
+        };
+
+        max.innerText = b_num;
+        main.innerText = backgammon;
+        area0.innerText = floor_num;
+        area1.innerText = square_num;
+        area2.innerText = dice;
+        area3.innerText = t;
+        area4.insertAdjacentHTML("beforeend",log);
+    };
+</Script>
+
+</body>
+
+</html>
